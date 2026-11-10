@@ -362,7 +362,11 @@ public class TouchInputHandler {
             mScroller.onTouchEvent(event);
             // Direct touch mode forwards raw touch events to the X11 client; pinch-zoom would
             // fight over the same two fingers, so leave zooming to the extra-keys bar there.
-            if (!(mInputStrategy instanceof InputStrategyInterface.NullInputStrategy))
+            // Fork patch: a hardware touchpad (external trackpad, e.g. a tablet keyboard cover) pinch must
+            // not zoom the X11 screen. Pinch-zoom stays available for on-screen touch and the extra-keys bar.
+            boolean fromHardwareTouchpad = (event.getSource() & InputDevice.SOURCE_TOUCHPAD) == InputDevice.SOURCE_TOUCHPAD
+                    || isDexEvent(event);
+            if (!(mInputStrategy instanceof InputStrategyInterface.NullInputStrategy) && !fromHardwareTouchpad)
                 mZoomer.onTouchEvent(event);
             mTapDetector.onTouchEvent(event);
             mSwipePinchDetector.onTouchEvent(event);
